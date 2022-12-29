@@ -14,7 +14,9 @@ defmodule Ethex.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      mod: {Ethex, []},
+      extra_applications: [:logger],
+      env: [request_id: "ethex"]
     ]
   end
 

@@ -3,12 +3,11 @@ defmodule Ethex.Utils do
   some utils
   """
   require Logger
-  @request_id "chemixpad"
 
   @doc false
   @spec http_post(String.t(), map()) :: any()
   def http_post(rpc, params) do
-    req_body = Map.merge(%{jsonrpc: "2.0", id: @request_id}, params)
+    req_body = Map.merge(%{jsonrpc: "2.0", id: fetch_request_id()}, params)
 
     with {:ok, encoded_data} <- Jason.encode(req_body),
          {:ok, %HTTPoison.Response{status_code: 200, body: body}} <-
@@ -31,6 +30,13 @@ defmodule Ethex.Utils do
       other ->
         Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: inspect(other))
         {:error, "unknown error"}
+    end
+  end
+
+  defp fetch_request_id() do
+    case Application.fetch_env(:ethex, :request_id) do
+      {:ok, value} -> value
+      :error -> "ethex"
     end
   end
 end
