@@ -27,7 +27,6 @@ defmodule Ethex.MixProject do
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
       {:jason, "~> 1.4"},
       {:httpoison, "~> 1.8"},
-      # {:ex_keccak, "~> 0.6.0"}
       {:ex_abi, "~> 0.5.16"}
     ]
   end

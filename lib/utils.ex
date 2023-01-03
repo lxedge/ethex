@@ -19,9 +19,9 @@ defmodule Ethex.Utils do
         Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: "invalid params")
         {:error, "invalid params"}
 
-      {:error, %HTTPoison.Error{reason: :timeout}} ->
-        Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: "timeout")
-        {:error, "timeout"}
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: inspect(reason))
+        {:error, reason}
 
       {:ok, %{error: error}} ->
         Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: inspect(error))
@@ -32,6 +32,13 @@ defmodule Ethex.Utils do
         {:error, "unknown error"}
     end
   end
+
+  # @spec camel_to_underscore(map()) :: map()
+  # def camel_to_underscore(map) when is_map(map) do
+  #   Enum.reduce(map, %{}, fn {k, v}, acc ->
+  #     Map.put(acc, k |> Macro.underscore() |> String.to_atom(), v)
+  #   end)
+  # end
 
   defp fetch_request_id() do
     case Application.fetch_env(:ethex, :request_id) do
