@@ -20,7 +20,7 @@ defmodule Ethex.Account.Wallet do
 
     %{
       private_key: encoded_private_key,
-      public_key: Base.encode16(public_key),
+      public_key: Base.encode16(public_key, case: :lower),
       eth_address: eth_address,
       mnemonic_phrase: Mnemonic.entropy_to_mnemonic(encoded_private_key)
     }

@@ -2,7 +2,14 @@ defmodule Ethex do
   @moduledoc """
   Documentation for `Ethex`.
   """
+  alias Ethex.Account.Wallet
   alias Ethex.Abi.{Abi, Event}
+
+  # #### Account related ####
+
+  defdelegate create_wallet(), to: Wallet, as: :create
+
+  defdelegate create_wallet(private_key), to: Wallet, as: :create
 
   # #### Abi related ####
 
