@@ -14,7 +14,7 @@ defmodule Ethex.Abi.Abi do
     GenServer.call(__MODULE__, {:register_abi, name, abi_file_path})
   end
 
-  @spec get_selectors_by_name(String.t()) :: list()
+  @spec get_selectors_by_name(String.t()) :: {:ok, list()} | {:error, :not_found}
   def get_selectors_by_name(name) do
     GenServer.call(__MODULE__, {:get_selectors_by_name, name})
   end
@@ -38,6 +38,9 @@ defmodule Ethex.Abi.Abi do
 
   @impl GenServer
   def handle_call({:get_selectors_by_name, name}, _, state) do
-    {:reply, Map.get(state, name), state}
+    case Map.get(state, name) do
+      nil -> {:reply, {:error, :not_found}, state}
+      selectors -> {:reply, {:ok, selectors}, state}
+    end
   end
 end
