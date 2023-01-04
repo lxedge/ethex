@@ -4,6 +4,12 @@ defmodule Ethex.Utils do
   """
   require Logger
 
+  @spec to_hex(integer()) :: String.t()
+  def to_hex(number), do: "0x" <> Integer.to_string(number, 16)
+
+  @spec from_hex(String.t()) :: integer()
+  def from_hex("0x" <> hex_string), do: String.to_integer(hex_string, 16)
+
   @doc false
   @spec http_post(String.t(), map()) :: any()
   def http_post(rpc, params) do
