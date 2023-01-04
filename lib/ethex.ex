@@ -7,8 +7,10 @@ defmodule Ethex do
 
   # #### Account related ####
 
+  @spec create_wallet :: map()
   defdelegate create_wallet(), to: Wallet, as: :create
 
+  @spec create_wallet(String.t()) :: map()
   defdelegate create_wallet(private_key), to: Wallet, as: :create
 
   # #### Abi related ####
