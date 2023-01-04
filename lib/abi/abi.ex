@@ -9,9 +9,9 @@ defmodule Ethex.Abi.Abi do
   @spec print_state :: map()
   def print_state(), do: GenServer.call(__MODULE__, :print_state)
 
-  @spec add_abi(String.t(), any) :: :ok | :error
-  def add_abi(name, abi_file_path) do
-    GenServer.call(__MODULE__, {:add_abi, name, abi_file_path})
+  @spec register_abi(String.t(), any) :: :ok | :error
+  def register_abi(name, abi_file_path) do
+    GenServer.call(__MODULE__, {:register_abi, name, abi_file_path})
   end
 
   @spec get_selectors_by_name(String.t()) :: list()
@@ -26,7 +26,7 @@ defmodule Ethex.Abi.Abi do
   def handle_call(:print_state, _, state), do: {:reply, state, state}
 
   @impl GenServer
-  def handle_call({:add_abi, name, abi_file_path}, _, state) do
+  def handle_call({:register_abi, name, abi_file_path}, _, state) do
     with {:ok, str} <- File.read(abi_file_path),
          {:ok, abi} <- Jason.decode(str) do
       fs = ABI.parse_specification(abi, include_events?: true)
