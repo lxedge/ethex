@@ -1,4 +1,4 @@
-defmodule Ethex.Query do
+defmodule Ethex.Blockchain.Query do
   @moduledoc """
   https://ethereum.org/en/developers/docs/apis/json-rpc/
   """
@@ -8,8 +8,12 @@ defmodule Ethex.Query do
   @doc """
   当前块号
   """
+  @spec eth_block_number(String.t()) :: {:error, any} | {:ok, integer}
   def eth_block_number(rpc) do
-    Utils.http_post(rpc, %{method: "eth_blockNumber", params: []})
+    case Utils.http_post(rpc, %{method: "eth_blockNumber", params: []}) do
+      {:ok, num} -> {:ok, Utils.from_hex(num)}
+      error -> error
+    end
   end
 
   @doc """

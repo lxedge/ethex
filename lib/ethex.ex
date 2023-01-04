@@ -4,6 +4,12 @@ defmodule Ethex do
   """
   alias Ethex.Account.Wallet
   alias Ethex.Abi.{Abi, Event}
+  alias Ethex.Blockchain.Query
+
+  # #### Blockchain related ####
+
+  @spec block_number(String.t()) :: {:error, any} | {:ok, integer}
+  defdelegate block_number(rpc), to: Query, as: :eth_block_number
 
   # #### Account related ####
 

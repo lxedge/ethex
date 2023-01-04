@@ -10,7 +10,7 @@ defmodule Ethex.Abi.Event do
   """
   alias Ethex.Abi.Abi
   alias Ethex.Utils
-  alias Ethex.Query
+  alias Ethex.Blockchain.Query
 
   @doc """
   combine eth_getLogs with decode, using the given abi_name, which MUST register in Abi genserver.
