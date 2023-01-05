@@ -9,8 +9,8 @@ defmodule Ethex.Abi.Event do
   }
   """
   alias Ethex.Abi.Abi
-  alias Ethex.Utils
   alias Ethex.Blockchain.Query
+  alias Ethex.Utils
 
   @doc """
   combine eth_getLogs with decode, using the given abi_name, which MUST register in Abi genserver.
@@ -47,7 +47,7 @@ defmodule Ethex.Abi.Event do
 
   @spec decode_log(map(), ABI.FunctionSelector.t()) :: map()
   def decode_log(log, selector) do
-    returns = Map.merge(decode_topics(log.topics, selector), decode_data(log.data, selector))
+    returns = Enum.concat(decode_topics(log.topics, selector), decode_data(log.data, selector))
     # list all fields for understanding easily, so doesn't use Macro.underscore() here
     %{
       address: log.address,
@@ -81,7 +81,7 @@ defmodule Ethex.Abi.Event do
         |> encode16_if_need()
       end)
 
-    Enum.zip(Enum.map(names, &String.to_atom(&1)), datas) |> Enum.into(%{})
+    Enum.zip(names, datas) |> Enum.map(fn {name, data} -> %{name: name, value: data} end)
   end
 
   defp decode_data(data, selector) do
@@ -93,7 +93,7 @@ defmodule Ethex.Abi.Event do
       |> ABI.decode(to_binary_helper(data))
       |> Enum.map(&encode16_if_need/1)
 
-    Enum.zip(Enum.map(names, &String.to_atom(&1)), datas) |> Enum.into(%{})
+    Enum.zip(names, datas) |> Enum.map(fn {name, data} -> %{name: name, value: data} end)
   end
 
   defp encode_data_signature(function_selector) do
