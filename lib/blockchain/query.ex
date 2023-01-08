@@ -32,7 +32,7 @@ defmodule Ethex.Blockchain.Query do
       see the default block parameter
   """
   def eth_call(rpc, params, block \\ "latest") do
-    Logger.info(name: :eth_call, rpc: rpc, params: inspect(params))
+    # Logger.info(name: :eth_call, rpc: rpc, params: inspect(params))
     Utils.http_post(rpc, %{method: "eth_call", params: [params, block]})
   end
 
@@ -40,7 +40,7 @@ defmodule Ethex.Blockchain.Query do
   获取历史块的事件，指定块的范围
   """
   def eth_get_logs(rpc, filter) do
-    Logger.info(name: :eth_get_logs, rpc: rpc, params: inspect(filter))
+    # Logger.info(name: :eth_get_logs, rpc: rpc, params: inspect(filter))
     Utils.http_post(rpc, %{method: "eth_getLogs", params: [filter]})
   end
 
@@ -55,7 +55,7 @@ defmodule Ethex.Blockchain.Query do
   }
   """
   def eth_new_filter(rpc, filter) do
-    Logger.info(name: :eth_new_filter, rpc: rpc, params: inspect(filter))
+    # Logger.info(name: :eth_new_filter, rpc: rpc, params: inspect(filter))
     Utils.http_post(rpc, %{method: "eth_newFilter", params: [filter]})
   end
 
@@ -63,7 +63,7 @@ defmodule Ethex.Blockchain.Query do
   使用 filter_id 获取自 from 以来的 logs
   """
   def eth_get_filter_logs(rpc, filter_id) do
-    Logger.info(name: :eth_get_filter_logs, rpc: rpc, params: inspect(filter_id))
+    # Logger.info(name: :eth_get_filter_logs, rpc: rpc, params: inspect(filter_id))
     Utils.http_post(rpc, %{method: "eth_getFilterLogs", params: [filter_id]})
   end
 
