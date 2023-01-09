@@ -21,13 +21,29 @@ defmodule Ethex.Utils do
          {:ok, %{result: result}} <- Jason.decode(body, keys: :atoms) do
       {:ok, result}
     else
-      {:error, %Jason.EncodeError{}} ->
-        Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: "invalid params")
-        {:error, "invalid params"}
+      {:ok, %HTTPoison.Response{status_code: 502}} ->
+        Logger.error(
+          name: :http_post,
+          rpc: rpc,
+          params: inspect(params),
+          error: "Bad Gateway"
+        )
+
+      {:ok, %HTTPoison.Response{status_code: 503}} ->
+        Logger.error(
+          name: :http_post,
+          rpc: rpc,
+          params: inspect(params),
+          error: "Service Temporarily Unavailable"
+        )
 
       {:error, %HTTPoison.Error{reason: reason}} ->
         Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: inspect(reason))
         {:error, reason}
+
+      {:error, %Jason.EncodeError{}} ->
+        Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: "invalid params")
+        {:error, "invalid params"}
 
       {:ok, %{error: error}} ->
         Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: inspect(error))
