@@ -9,7 +9,7 @@ defmodule Ethex.Abi.Event do
   }
   """
   alias Ethex.Abi.Abi
-  alias Ethex.Blockchain.Query
+  alias Ethex.Blockchain.HistoryMethod
   alias Ethex.Utils
 
   @doc """
@@ -20,7 +20,7 @@ defmodule Ethex.Abi.Event do
   @spec get_logs_and_decode(String.t(), String.t(), map()) :: {:error, any()} | {:ok, list()}
   def get_logs_and_decode(rpc, abi_name, filter) do
     with {:ok, selectors} <- Abi.get_selectors_by_name(abi_name),
-         {:ok, logs} <- Query.eth_get_logs(rpc, filter) do
+         {:ok, logs} <- HistoryMethod.eth_get_logs(rpc, filter) do
       {:ok, decode(logs, selectors)}
     else
       error -> error
