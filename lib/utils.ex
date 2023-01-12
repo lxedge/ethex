@@ -13,11 +13,13 @@ defmodule Ethex.Utils do
   @doc false
   @spec http_post(String.t(), map()) :: any()
   def http_post(rpc, params) do
+    headers = [{"content-type", "application/json"}]
+    options = [timeout: 60000, recv_timeout: 5000]
     req_body = Map.merge(%{jsonrpc: "2.0", id: fetch_request_id()}, params)
 
     with {:ok, encoded_data} <- Jason.encode(req_body),
          {:ok, %HTTPoison.Response{status_code: 200, body: body}} <-
-           HTTPoison.post(rpc, encoded_data, [{"content-type", "application/json"}]),
+           HTTPoison.post(rpc, encoded_data, headers, options),
          {:ok, %{result: result}} <- Jason.decode(body, keys: :atoms) do
       {:ok, result}
     else
