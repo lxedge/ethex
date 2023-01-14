@@ -5,8 +5,8 @@ defmodule Ethex.MixProject do
     [
       app: :ethex,
       version: "0.1.1",
-      elixir: "~> 1.14",
-      description: "Ethereum cross chain json-rpc implement based on ex_abi",
+      elixir: "~> 1.12",
+      description: "Ethereum json-rpc implementation for multi-chain based on ex_abi",
       package: [
         licenses: ["GPL-3.0"],
         links: %{"GitHub" => "https://github.com/lxedge/ethex"}
