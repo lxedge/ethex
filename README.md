@@ -23,7 +23,7 @@ The package can be installed by adding `ethex` to your list of dependencies in `
 ```elixir
 def deps do
   [
-    {:ethex, "~> 0.1.1"}
+    {:ethex, "~> 0.1.2"}
   ]
 end
 ```
