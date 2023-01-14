@@ -14,7 +14,7 @@ defmodule Ethex.Utils do
   @spec http_post(String.t(), map()) :: any()
   def http_post(rpc, params) do
     headers = [{"content-type", "application/json"}]
-    options = [timeout: 60000, recv_timeout: 5000]
+    options = [timeout: 30000, recv_timeout: 5000]
     req_body = Map.merge(%{jsonrpc: "2.0", id: fetch_request_id()}, params)
 
     with {:ok, encoded_data} <- Jason.encode(req_body),
