@@ -39,20 +39,35 @@ iex(1)> Ethex.block_number "https://matic-mumbai.chainstacklabs.com"
 {:ok, 30949805}
 ```
 
-#### create wallet
-
-```elixir
-iex(1)> Ethex.create_wallet
-%{
-  eth_address: "0x13296794f023afd228da924cb55f89df4840bb32",
-  mnemonic_phrase: "cream attack thank jewel evolve mansion kitten round rare spice ridge couple emerge pluck farm three vibrant danger curious top unit general suspect agent",
-  private_key: "32e1cf7f3bf4e30e9ed5e3b21a32e618948b4d54cf08f366ecd7f27edac1b6b0",
-  public_key: "040be14240ba8e85cd9951a275a5cf4d7741883b0b292f98759c75e388abc2ab1068587932015649aa516719bbe147b3b5facdaf210d0903b697e9e47c893e3178"
-}
-```
-
 #### get logs and decode
 
 ```elixir
-
+iex(1)> Ethex.register_abi "erc20", "/path/to/erc20.abi.json"
+:ok
+iex(2)> filter = %{fromBlock: "0x1D841AD", toBlock: "0x1D8434C", address: ["0x42F771DC235830077A04EE518472D88671755fF8"]}
+%{
+  address: ["0x42F771DC235830077A04EE518472D88671755fF8"],
+  fromBlock: "0x1D841AD",
+  toBlock: "0x1D8434C"
+}
+iex(3)> Ethex.get_logs_and_decode "https://matic-mumbai.chainstacklabs.com", "erc20", filter
+{:ok,
+ [
+   %{
+     address: "0x42f771dc235830077a04ee518472d88671755ff8",
+     block_hash: "0xcc827e8fae4271bf91c65ce10b3a590b6d9c2d665cf8ae55224caf1444753b9d",
+     block_number: 30950172,
+     event_name: "Transfer",
+     log_index: "0x10",
+     removed: false,
+     returns: [
+       %{name: "_from", value: "0x8ccf629e123d83112423c283998443829a291334"},
+       %{name: "_to", value: "0xa2e7d1addb682c3f2ba78d5124433cb8ba2a4f4b"},
+       %{name: "_value", value: 10000000000000000000000}
+     ],
+     transaction_hash: "0x48965d02c69f3eae46486d677efd55f06943fda3d8c2acf667ac5980ad569a1c",
+     transaction_index: "0x5"
+   }
+ ]}
+iex(28)>
 ```
