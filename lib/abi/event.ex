@@ -9,8 +9,45 @@ defmodule Ethex.Abi.Event do
   }
   """
   alias Ethex.Abi.Abi
-  alias Ethex.Blockchain.HistoryMethod
+  alias Ethex.Blockchain.{GossipMethod, HistoryMethod}
   alias Ethex.Utils
+
+  @doc """
+  Generate fromBlock and toBlock params according to current block num
+
+  1. when `last_block` == latest, fetch from newest back to 20 blocks.
+  2. when `cur_block` - `last_block` > 800, fetch from `last_block` forwards 800 blocks.
+  3. else, `cur_block` - `last_block` > 800, fetch from `last_block` to cur_block.
+
+  NOTE: the max block range in Polygon is 1000, in BSC is 5000.
+  """
+  @spec gen_block_range(String.t(), non_neg_integer() | String.t()) :: any()
+  def gen_block_range(rpc, "latest") do
+    case GossipMethod.eth_block_number(rpc) do
+      {:ok, cur_block} ->
+        {:ok, cur_block,
+         %{fromBlock: Utils.to_hex(cur_block - 20), toBlock: Utils.to_hex(cur_block)}}
+
+      error ->
+        error
+    end
+  end
+
+  def gen_block_range(rpc, last_block) when is_integer(last_block) do
+    case GossipMethod.eth_block_number(rpc) do
+      {:ok, cur_block} ->
+        if cur_block - last_block > 800 do
+          {:ok, last_block + 800,
+           %{fromBlock: Utils.to_hex(last_block), toBlock: Utils.to_hex(last_block + 800)}}
+        else
+          {:ok, cur_block,
+           %{fromBlock: Utils.to_hex(last_block), toBlock: Utils.to_hex(cur_block)}}
+        end
+
+      error ->
+        error
+    end
+  end
 
   @doc """
   combine eth_getLogs with decode, using the given abi_name, which MUST register in Abi genserver.

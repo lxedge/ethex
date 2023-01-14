@@ -29,6 +29,10 @@ defmodule Ethex do
 
   # #### Event related ####
 
+  @spec gen_block_range(String.t(), non_neg_integer() | String.t()) ::
+          {:ok, non_neg_integer(), map()} | {:error, any()}
+  defdelegate gen_block_range(rpc, last_block), to: Event
+
   @spec get_logs_and_decode(String.t(), String.t(), map()) :: {:error, any()} | {:ok, list()}
   defdelegate get_logs_and_decode(rpc, abi_name, filter), to: Event
 
