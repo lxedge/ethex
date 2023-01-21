@@ -53,7 +53,7 @@ iex(2)> filter = %{fromBlock: "0x1D841AD", toBlock: "0x1D8434C", address: ["0x42
 iex(3)> Ethex.get_logs_and_decode "https://matic-mumbai.chainstacklabs.com", "erc20", filter
 {:ok,
  [
-   %{
+   %Ethex.Struct.Transaction{
      address: "0x42f771dc235830077a04ee518472d88671755ff8",
      block_hash: "0xcc827e8fae4271bf91c65ce10b3a590b6d9c2d665cf8ae55224caf1444753b9d",
      block_number: 30950172,

@@ -85,8 +85,8 @@ defmodule Ethex.Abi.Event do
   @spec decode_log(map(), ABI.FunctionSelector.t()) :: map()
   def decode_log(log, selector) do
     returns = Enum.concat(decode_topics(log.topics, selector), decode_data(log.data, selector))
-    # list all fields for understanding easily, so doesn't use Macro.underscore() here
-    %{
+
+    %Ethex.Struct.Transaction{
       address: log.address,
       block_hash: log.blockHash,
       block_number: Utils.from_hex(log.blockNumber),
