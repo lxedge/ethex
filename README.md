@@ -69,5 +69,13 @@ iex(3)> Ethex.get_logs_and_decode "https://matic-mumbai.chainstacklabs.com", "er
      transaction_index: "0x5"
    }
  ]}
-iex(28)>
+```
+
+#### gen block range
+
+```elixir
+iex(1)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", "latest"
+{:ok, 31246216, %{fromBlock: "0x1DCC774", toBlock: "0x1DCC788"} }
+iex(2)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", 31246216
+{:ok, 31246262, %{fromBlock: "0x1DCC788", toBlock: "0x1DCC7B6"} }
 ```
