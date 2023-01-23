@@ -3,7 +3,7 @@ defmodule Ethex do
   Documentation for `Ethex`.
   """
   alias Ethex.Account.Wallet
-  alias Ethex.Abi.{Abi, Event}
+  alias Ethex.Abi.{Abi, Function, Event}
   alias Ethex.Blockchain.{GossipMethod}
 
   # #### Blockchain related ####
@@ -26,6 +26,12 @@ defmodule Ethex do
 
   @spec get_selectors_by_name(String.t()) :: {:ok, list()} | {:error, :not_found}
   defdelegate get_selectors_by_name(name), to: Abi
+
+  # #### Function related ####
+
+  @spec call(String.t(), String.t(), String.t(), String.t(), list()) ::
+          {:ok, list()} | {:error, any()}
+  defdelegate call(rpc, abi_name, address, fun_name, args \\ []), to: Function
 
   # #### Event related ####
 

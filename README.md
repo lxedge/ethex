@@ -71,6 +71,19 @@ iex(3)> Ethex.get_logs_and_decode "https://matic-mumbai.chainstacklabs.com", "er
  ]}
 ```
 
+#### function call
+
+```elixir
+iex(5)> Ethex.call "https://matic-mumbai.chainstacklabs.com", "erc20",
+...(5)> "0xf167FcA5b9FeDf4E8baCAf8547225af93832ed6F", "balanceOf",
+...(5)> ["8CcF629e123D83112423c283998443829A291334" |> Base.decode16!(case: :mixed)]
+{:ok, [9999998000000000000000000000]}
+iex(6)>
+iex(7)> Ethex.call "https://matic-mumbai.chainstacklabs.com", "erc20",
+...(7)> "0xf167FcA5b9FeDf4E8baCAf8547225af93832ed6F", "symbol"
+{:ok, ["VLT"]}
+```
+
 #### gen block range
 
 ```elixir
