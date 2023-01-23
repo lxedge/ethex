@@ -16,6 +16,10 @@ Every time I sync logs from chain, firstly decode indexed topic and decode data,
 
 In my case, the contract can deployed on ETH, or BSC, or Polygon. So I need to switch between multi-chain, not just one global config for json-rpc client.
 
+### case four
+
+In production, there are many contracts which its address is constructed by a factory contract. So those library who combine address in a module is not a good idea.
+
 ## Installation
 
 The package can be installed by adding `ethex` to your list of dependencies in `mix.exs`:
@@ -82,7 +86,7 @@ iex(5)> Ethex.get_logs_and_decode "https://matic-mumbai.chainstacklabs.com", "er
  ]}
 ```
 
-For polling logs, you need to maintaining block range, to avoid `excceed max block` error. So here is a util for generate block range, it need `latest` or the block number you sync last time. The reason why not use `eth_getFilterChanges` is that some chain not implement this method.
+For polling logs, you need to maintaining rpc endpoint and block range, to avoid `excceed max block` error. So here is a util for generate block range, it need `latest` or the block number you sync last time. The reason why not use `eth_getFilterChanges` is that some chain not implement this method.
 
 ```elixir
 iex(1)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", "latest"
@@ -93,6 +97,5 @@ iex(2)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", 3124621
 
 ## TODO
 
-- add changelog
 - add send transaction, this will update minor version to 0.2.0
 - add config to initial register_abi and request_id
