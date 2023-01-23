@@ -23,34 +23,45 @@ The package can be installed by adding `ethex` to your list of dependencies in `
 ```elixir
 def deps do
   [
-    {:ethex, "~> 0.1.2"}
+    {:ethex, "~> 0.1.3"}
   ]
 end
 ```
 
 ## Usage
 
-### Example
-
-#### eth block number
+You can get eth_block_number directly:
 
 ```elixir
 iex(1)> Ethex.block_number "https://matic-mumbai.chainstacklabs.com"
 {:ok, 30949805}
 ```
 
-#### get logs and decode
+When interact with contract on blockchain, firstly, register abi to let Ethex know about it. Given the abi name and abi path.
 
 ```elixir
-iex(1)> Ethex.register_abi "erc20", "/path/to/erc20.abi.json"
-:ok
-iex(2)> filter = %{fromBlock: "0x1D841AD", toBlock: "0x1D8434C", address: ["0x42F771DC235830077A04EE518472D88671755fF8"]}
+iex(2)> Ethex.register_abi "erc20", "/path/to/erc20.abi.json"
+```
+
+Then you can call function like `balanceOf`:
+
+```elixir
+iex(3)> Ethex.call "https://matic-mumbai.chainstacklabs.com", "erc20",
+...(3)>   "0xf167FcA5b9FeDf4E8baCAf8547225af93832ed6F", "balanceOf",
+...(3)>   ["8CcF629e123D83112423c283998443829A291334" |> Base.decode16!(case: :mixed)]
+{:ok, [9999998000000000000000000000]}
+```
+
+And when do sync logs from blockchain by https endpoint:
+
+```elixir
+iex(4)> filter = %{fromBlock: "0x1D841AD", toBlock: "0x1D8434C", address: ["0x42F771DC235830077A04EE518472D88671755fF8"]}
 %{
   address: ["0x42F771DC235830077A04EE518472D88671755fF8"],
   fromBlock: "0x1D841AD",
   toBlock: "0x1D8434C"
 }
-iex(3)> Ethex.get_logs_and_decode "https://matic-mumbai.chainstacklabs.com", "erc20", filter
+iex(5)> Ethex.get_logs_and_decode "https://matic-mumbai.chainstacklabs.com", "erc20", filter
 {:ok,
  [
    %Ethex.Struct.Transaction{
@@ -71,20 +82,7 @@ iex(3)> Ethex.get_logs_and_decode "https://matic-mumbai.chainstacklabs.com", "er
  ]}
 ```
 
-#### function call
-
-```elixir
-iex(5)> Ethex.call "https://matic-mumbai.chainstacklabs.com", "erc20",
-...(5)> "0xf167FcA5b9FeDf4E8baCAf8547225af93832ed6F", "balanceOf",
-...(5)> ["8CcF629e123D83112423c283998443829A291334" |> Base.decode16!(case: :mixed)]
-{:ok, [9999998000000000000000000000]}
-iex(6)>
-iex(7)> Ethex.call "https://matic-mumbai.chainstacklabs.com", "erc20",
-...(7)> "0xf167FcA5b9FeDf4E8baCAf8547225af93832ed6F", "symbol"
-{:ok, ["VLT"]}
-```
-
-#### gen block range
+For polling logs, you need to maintaining block range, to avoid `excceed max block` error. So here is a util for generate block range, it need `latest` or the block number you sync last time. The reason why not use `eth_getFilterChanges` is that some chain not implement this method.
 
 ```elixir
 iex(1)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", "latest"
@@ -92,3 +90,9 @@ iex(1)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", "latest
 iex(2)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", 31246216
 {:ok, 31246262, %{fromBlock: "0x1DCC788", toBlock: "0x1DCC7B6"} }
 ```
+
+## TODO
+
+- add changelog
+- add send transaction, this will update minor version to 0.2.0
+- add config to initial register_abi and request_id

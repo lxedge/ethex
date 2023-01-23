@@ -4,7 +4,7 @@ defmodule Ethex.MixProject do
   def project do
     [
       app: :ethex,
-      version: "0.1.2",
+      version: "0.1.3",
       elixir: "~> 1.12",
       description: "Ethereum json-rpc implementation for multi-chain based on ex_abi",
       package: [
