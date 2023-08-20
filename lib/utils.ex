@@ -30,6 +30,7 @@ defmodule Ethex.Utils do
           params: inspect(params),
           error: "Bad Gateway"
         )
+        {:error, "Bad Gateway"}
 
       {:ok, %HTTPoison.Response{status_code: 503}} ->
         Logger.error(
@@ -38,6 +39,7 @@ defmodule Ethex.Utils do
           params: inspect(params),
           error: "Service Temporarily Unavailable"
         )
+        {:error, "Service Temporarily Unavailable"}
 
       {:error, %HTTPoison.Error{reason: reason}} ->
         Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: inspect(reason))
