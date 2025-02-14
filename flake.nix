@@ -1,15 +1,19 @@
 {
-  description = "Nita OS Flake";
+  description = "Ethex Flake";
 
   inputs = {
+    rust-overlay.url = "github:oxalica/rust-overlay";
     nixpkgs.url = "github:NixOS/nixpkgs?ref=master";
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, rust-overlay }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        overlays = [ (import rust-overlay) ];
+        pkgs = import nixpkgs {
+          inherit system overlays;
+        };
         LANG = "C.UTF-8";
       in
       with pkgs; {
@@ -17,6 +21,14 @@
           inherit LANG;
 
           buildInputs = [
+            (rust-bin.stable.latest.default.override {
+              extensions = [ "rust-src" "rust-analyzer" ];
+            })
+	    rust-analyzer
+	    pkg-config
+            openssl
+            cargo
+            binaryen
             just
             zellij
             curl
@@ -49,6 +61,7 @@
             export ERL_AFLAGS="-kernel shell_history enabled -kernel shell_history_path '\"$PWD/.erlang-history\"'"
             export ELIXIR_ERL_OPTIONS="+fnu"
             # export HEX_MIRROR=https://hexpm.upyun.com
+	    # export RUSTLER_NIF_VERSION=2.16
           '';
         };
       }

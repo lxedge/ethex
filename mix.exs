@@ -30,11 +30,12 @@ defmodule Ethex.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ex_doc, "~> 0.29.1", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.37.1", only: :dev, runtime: false},
       {:jason, "~> 1.4"},
       {:httpoison, "~> 1.8"},
-      {:ex_abi, "~> 0.5.16"},
-      {:ex_secp256k1, "~> 0.6.0"},
+      {:rustler, "~> 0.36.1"},
+      {:ex_abi, "~> 0.8.2"},
+      {:ex_secp256k1, "~> 0.7.4"},
       {:mnemonic, "~> 0.3.1"}
     ]
   end
