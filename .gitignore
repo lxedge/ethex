@@ -24,3 +24,10 @@ ethex-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+.DS_Store
+.elixir_ls
+.direnv
+.erlang-history
+.nix-hex
+.nix-mix
