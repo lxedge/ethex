@@ -13,10 +13,10 @@ defmodule Ethex do
 
   # #### Account related ####
 
-  @spec create_wallet :: map()
+  @spec create_wallet() :: %Wallet{}
   defdelegate create_wallet(), to: Wallet, as: :create
 
-  @spec create_wallet(String.t()) :: map()
+  @spec create_wallet(String.t()) :: %Wallet{}
   defdelegate create_wallet(private_key), to: Wallet, as: :create
 
   # #### Abi related ####
@@ -29,6 +29,8 @@ defmodule Ethex do
 
   # #### Function related ####
 
+  @spec call(String.t(), String.t(), String.t(), String.t()) ::
+          {:ok, list()} | {:error, any()}
   @spec call(String.t(), String.t(), String.t(), String.t(), list()) ::
           {:ok, list()} | {:error, any()}
   defdelegate call(rpc, abi_name, address, fun_name, args \\ []), to: Function

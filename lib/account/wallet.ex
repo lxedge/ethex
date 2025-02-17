@@ -1,11 +1,22 @@
 defmodule Ethex.Account.Wallet do
+  @moduledoc """
+  Wallet Address
+  """
+
+  defstruct private_key: nil,
+            public_key: nil,
+            eth_address: nil,
+            mnemonic_phrase: nil
+
+  @spec create() :: %__MODULE__{}
+  @spec create(binary()) :: %__MODULE__{}
   def create(private_key \\ :crypto.strong_rand_bytes(32))
 
   def create(<<encoded_private_key::binary-size(64)>>) do
     public_key = get_public_key(encoded_private_key)
     eth_address = get_address(public_key)
 
-    %{
+    %__MODULE__{
       private_key: encoded_private_key,
       public_key: Base.encode16(public_key, case: :lower),
       eth_address: eth_address,
@@ -18,7 +29,7 @@ defmodule Ethex.Account.Wallet do
     public_key = get_public_key(private_key)
     eth_address = get_address(public_key)
 
-    %{
+    %__MODULE__{
       private_key: encoded_private_key,
       public_key: Base.encode16(public_key, case: :lower),
       eth_address: eth_address,
