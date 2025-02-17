@@ -140,7 +140,7 @@ defmodule Ethex.Abi.Event do
   end
 
   defp to_binary_helper(hex_string) do
-    hex_string |> String.slice(2..-1) |> Base.decode16!(case: :lower)
+    hex_string |> String.slice(2..-1//1) |> Base.decode16!(case: :lower)
   end
 
   defp filter_helper(inputs_indexed, target_list, reserve_bool) do

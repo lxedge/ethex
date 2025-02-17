@@ -10,54 +10,37 @@ defmodule Ethex.Utils do
   @spec from_hex(String.t()) :: integer()
   def from_hex("0x" <> hex_string), do: String.to_integer(hex_string, 16)
 
-  @doc false
   @spec http_post(String.t(), map()) :: any()
   def http_post(rpc, params) do
-    headers = [{"content-type", "application/json"}]
-    options = [timeout: 30000, recv_timeout: 5000]
-    req_body = Map.merge(%{jsonrpc: "2.0", id: fetch_request_id()}, params)
+    headers = [{"Content-Type", "application/json"}]
+    body = Map.merge(%{jsonrpc: "2.0", id: fetch_request_id()}, params)
+    opts = [request_timeout: 30_000, receive_timeout: 5_000]
 
-    with {:ok, encoded_data} <- Jason.encode(req_body),
-         {:ok, %HTTPoison.Response{status_code: 200, body: body}} <-
-           HTTPoison.post(rpc, encoded_data, headers, options),
+    with {:ok, body_str} <- Jason.encode(body),
+         %Finch.Request{} = req <- Finch.build(:post, rpc, headers, body_str, opts),
+         {:ok, %Finch.Response{status: 200, body: body}} <- Finch.request(req, Ethex.Finch),
          {:ok, %{result: result}} <- Jason.decode(body, keys: :atoms) do
       {:ok, result}
     else
-      {:ok, %HTTPoison.Response{status_code: 502}} ->
-        Logger.error(
-          name: :http_post,
-          rpc: rpc,
-          params: inspect(params),
-          error: "Bad Gateway"
-        )
-
-        {:error, "Bad Gateway"}
-
-      {:ok, %HTTPoison.Response{status_code: 503}} ->
-        Logger.error(
-          name: :http_post,
-          rpc: rpc,
-          params: inspect(params),
-          error: "Service Temporarily Unavailable"
-        )
-
-        {:error, "Service Temporarily Unavailable"}
-
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: inspect(reason))
-        {:error, reason}
-
       {:error, %Jason.EncodeError{}} ->
-        Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: "invalid params")
-        {:error, "invalid params"}
+        Logger.error("Ethex.Utils.http_post request body error: #{inspect(params)}")
+        {:error, :invalid_params}
 
-      {:ok, %{error: error}} ->
-        Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: inspect(error))
-        {:error, error}
+      {:error, %Mint.TransportError{reason: :nxdomain}} ->
+        Logger.error("Ethex.Utils.http_post network error: nxdomain")
+        {:error, :network_error}
+
+      {_, %Finch.Response{status: status}} ->
+        Logger.error("Ethex.Utils.http_post response status error: #{status}")
+        {:error, :response_error}
+
+      {:error, %Jason.DecodeError{}} ->
+        Logger.error("Ethex.Utils.http_post response body error")
+        {:error, :response_error}
 
       other ->
-        Logger.error(name: :http_post, rpc: rpc, params: inspect(params), error: inspect(other))
-        {:error, "unknown error"}
+        Logger.error("Ethex.Utils.http_post unknown error: #{inspect(other)}")
+        {:error, :unknown_error}
     end
   end
 

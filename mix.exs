@@ -32,7 +32,7 @@ defmodule Ethex.MixProject do
     [
       {:ex_doc, "~> 0.37.1", only: :dev, runtime: false},
       {:jason, "~> 1.4"},
-      {:httpoison, "~> 1.8"},
+      {:finch, "~> 0.19.0"},
       {:rustler, "~> 0.36.1"},
       {:ex_keccak, "~> 0.7.6"},
       {:ex_abi, "~> 0.8.2"},
