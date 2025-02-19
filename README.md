@@ -37,8 +37,8 @@ end
 You can get eth_block_number directly:
 
 ```elixir
-iex(1)> Ethex.block_number "https://matic-mumbai.chainstacklabs.com"
-{:ok, 30949805}
+iex(1)> Ethex.block_number "https://binance.llamarpc.com"
+{:ok, 46792582}
 ```
 
 ### Interact with contract
