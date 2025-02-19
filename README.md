@@ -1,24 +1,6 @@
 # Ethex
 
-Ethereum json-rpc implementation for multi-chain based on ex_abi.
-
-## Cases I met
-
-### case one
-
-In every elixir backend dapp, you need interact with contract on blockchain. And you need to write or copy get_logs logic and decode_event logic again and again.
-
-### case two
-
-Every time I sync logs from chain, firstly decode indexed topic and decode data, then combine them together. What I need is decoding once and never destroy origin structure of logs.
-
-### case three
-
-In my case, the contract can deployed on ETH, or BSC, or Polygon. So I need to switch between multi-chain, not just one global config for json-rpc client.
-
-### case four
-
-In production, there are many contracts which its address is constructed by a factory contract. So those library who combine address in a module is not a good idea.
+Ethereum json-rpc implementation for multi-chain based on ex_abi.  Focus on Contract interaction, with reading contract, writing contract, synchronizing contract events.
 
 ## Installation
 
@@ -37,65 +19,142 @@ end
 You can get eth_block_number directly:
 
 ```elixir
-iex(1)> Ethex.block_number "https://matic-mumbai.chainstacklabs.com"
-{:ok, 30949805}
+iex(1)> Ethex.block_number "https://binance.llamarpc.com"
+{:ok, 46792582}
 ```
 
-When interact with contract on blockchain, firstly, register abi to let Ethex know about it. Given the abi name and abi path.
+### Interact with contract
+
+First write a module to parse abi, known which contract address interact with and rpc endpoint request to.
 
 ```elixir
-iex(2)> Ethex.register_abi "erc20", "/path/to/erc20.abi.json"
+defmodule Test.USDT do
+  @moduledoc false
+  use Ethex.Abi,
+    rpc: "https://binance.llamarpc.com",
+    abi_path: "./priv/abi/usdt.abi.json",
+    contract_address: "0x55d398326f99059fF775485246999027B3197955"
+end
 ```
 
-Then you can call function like `balanceOf`:
+**Read the Contract**
 
 ```elixir
-iex(3)> Ethex.call "https://matic-mumbai.chainstacklabs.com", "erc20",
-...(3)>   "0xf167FcA5b9FeDf4E8baCAf8547225af93832ed6F", "balanceOf",
-...(3)>   ["8CcF629e123D83112423c283998443829A291334" |> Base.decode16!(case: :mixed)]
-{:ok, [9999998000000000000000000000]}
+iex(1)> Test.USDT.symbol
+{:ok, "USDT"}
+
+iex(3)> Test.USDT.name
+{:ok, "Tether USD"}
+
+iex(5)> Test.USDT.decimals
+{:ok, 18}
+
+iex(7)> Test.USDT.get_owner
+{:ok, "0xf68a4b64162906eff0ff6ae34e2bb1cd42fef62d"}
+
+iex(9)> Test.USDT.balance_of "0x8CcF629e123D83112423c283998443829A291334"
+{:ok, 4011000000000000}
 ```
 
-And when do sync logs from blockchain by https endpoint:
+**Get logs and decode**
+
+By invoking `eth_getLogs` method, it can fetch contract logs from chain with block range.
+Then, decode logs to events as result.
 
 ```elixir
-iex(4)> filter = %{fromBlock: "0x1D841AD", toBlock: "0x1D8434C", address: ["0x42F771DC235830077A04EE518472D88671755fF8"]}
-%{
-  address: ["0x42F771DC235830077A04EE518472D88671755fF8"],
-  fromBlock: "0x1D841AD",
-  toBlock: "0x1D8434C"
-}
-iex(5)> Ethex.get_logs_and_decode "https://matic-mumbai.chainstacklabs.com", "erc20", filter
+iex(1)> block_range = %Ethex.Web3.Structs.BlockRange{from_block: 46798863, to_block: 46798863}
+
+iex(2)> {:ok, logs} = Test.USDT.get_logs_and_decode block_range
 {:ok,
  [
-   %Ethex.Struct.Transaction{
-     address: "0x42f771dc235830077a04ee518472d88671755ff8",
-     block_hash: "0xcc827e8fae4271bf91c65ce10b3a590b6d9c2d665cf8ae55224caf1444753b9d",
-     block_number: 30950172,
-     event_name: "Transfer",
-     log_index: "0x10",
+   %Ethex.Web3.Structs.Event{
+     address: "0x55d398326f99059ff775485246999027b3197955",
+     block_hash: "0x943b3daa9119d8d4314f816a0f00cd824c9fe73a6d1a3076d16fe1ce91fc173d",
+     block_number: 46798863,
+     block_timestamp: 1739978103,
+     log_index: "0x1c",
      removed: false,
+     transaction_hash: "0x2c3795501857b8d6e1ccd00b4132373b25b76ccd399f1719aadbfec8d688c238",
+     transaction_index: "0x6",
      returns: [
-       %{name: "_from", value: "0x8ccf629e123d83112423c283998443829a291334"},
-       %{name: "_to", value: "0xa2e7d1addb682c3f2ba78d5124433cb8ba2a4f4b"},
-       %{name: "_value", value: 10000000000000000000000}
+       %{"from" => "0x47a90a2d92a8367a91efa1906bfc8c1e05bf10c4"},
+       %{"to" => "0x2d3b5ca3e5ff50b12cd9d58216abaaa6b3836443"},
+       %{"value" => 296241844581231922050}
      ],
-     transaction_hash: "0x48965d02c69f3eae46486d677efd55f06943fda3d8c2acf667ac5980ad569a1c",
-     transaction_index: "0x5"
-   }
- ]}
+     event_name: "Transfer"
+   },
+   %Ethex.Web3.Structs.Event{
+     address: "0x55d398326f99059ff775485246999027b3197955",
+     block_hash: "0x943b3daa9119d8d4314f816a0f00cd824c9fe73a6d1a3076d16fe1ce91fc173d",
+     block_number: 46798863,
+     block_timestamp: 1739978103,
+     log_index: "0x20",
+     removed: false,
+     transaction_hash: "0x6acedfff21e04d15a32eb633bce0e70cb82f6e8b2bbaab8800a1015c58452fd1",
+     transaction_index: "0x7",
+     returns: [
+       %{"from" => "0x172fcd41e0913e95784454622d1c3724f546f849"},
+       %{"to" => "0xaf30736465dec110ec6ab68d3a22e4b24968401f"},
+       %{"value" => 3755786748662943270309}
+     ],
+     event_name: "Transfer"
+   },
+   ...
+ ]
 ```
 
-For polling logs, you need to maintaining rpc endpoint and block range, to avoid `excceed max block` error. So here is a util for generate block range, it need `latest` or the block number you sync last time. The reason why not use `eth_getFilterChanges` is that some chain not implement this method.
+For polling logs, you need to maintaining block range to avoid `excceed max block` error. 
+
+So here is a util for generating block range, it need `latest` or the block number you sync last time. 
+The reason why not use `eth_getFilterChanges` is that some chain not implement this method.
+
+NOTE: the max block range in Polygon is 1000, in BSC is 5000.
 
 ```elixir
-iex(1)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", "latest"
-{:ok, 31246216, %{fromBlock: "0x1DCC774", toBlock: "0x1DCC788"} }
-iex(2)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", 31246216
-{:ok, 31246262, %{fromBlock: "0x1DCC788", toBlock: "0x1DCC7B6"} }
+iex(6)> Test.USDT.gen_block_range "latest"
+{:ok, 46799328,
+ %Ethex.Web3.Structs.BlockRange{from_block: 46799308, to_block: 46799328}}
+ 
+iex(7)> Test.USDT.gen_block_range 46798000
+{:ok, 46798800,
+ %Ethex.Web3.Structs.BlockRange{from_block: 46798000, to_block: 46798800}}
 ```
 
-## TODO
+If wanna sync logs automatically, using GenServer with loop, and maintaining block range. Here is an example,
 
-- add send transaction, this will update minor version to 0.2.0
-- add config to initial register_abi and request_id
+```elixir
+defmodule Test.USDT do
+  @moduledoc false
+  use GenServer
+
+  use Ethex.Abi,
+    # rpc: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
+    rpc: "https://binance.llamarpc.com",
+    abi_path: "./priv/abi/usdt.abi.json",
+    contract_address: "0x55d398326f99059fF775485246999027B3197955"
+
+  @loop_interval 10
+
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
+  end
+
+  @impl true
+  def init(:ok) do
+    Process.send_after(self(), :loop, :timer.seconds(@loop_interval))
+    {:ok, %{last_sync_block: "latest"}}
+  end
+
+  @impl true
+  def handle_info(:loop, %{last_sync_block: last_sync_block} = _state) do
+    {:ok, cur_sync_block, block_range} = gen_block_range(last_sync_block)
+    {:ok, _evts} = get_logs_and_decode(block_range)
+
+    # do some other work, such as save events into database
+    # Repo.insert evts
+
+    Process.send_after(self(), :loop, :timer.seconds(@loop_interval))
+    {:noreply, %{last_sync_block: cur_sync_block}}
+  end
+end
+```

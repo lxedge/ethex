@@ -1,6 +1,6 @@
-defmodule Ethex.Account.Wallet do
+defmodule Ethex.Web3.Wallet do
   @moduledoc """
-  Wallet Address
+  Wallet
   """
 
   defstruct private_key: nil,
