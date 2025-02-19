@@ -42,16 +42,16 @@ end
 ```elixir
 iex(1)> Test.USDT.symbol
 {:ok, "USDT"}
-iex(2)>
+
 iex(3)> Test.USDT.name
 {:ok, "Tether USD"}
-iex(4)>
+
 iex(5)> Test.USDT.decimals
 {:ok, 18}
-iex(6)>
+
 iex(7)> Test.USDT.get_owner
 {:ok, "0xf68a4b64162906eff0ff6ae34e2bb1cd42fef62d"}
-iex(8)>
+
 iex(9)> Test.USDT.balance_of "0x8CcF629e123D83112423c283998443829A291334"
 {:ok, 4011000000000000}
 ```
@@ -59,38 +59,60 @@ iex(9)> Test.USDT.balance_of "0x8CcF629e123D83112423c283998443829A291334"
 **Sync Contract Logs**
 
 ```elixir
-iex(4)> filter = %{fromBlock: "0x1D841AD", toBlock: "0x1D8434C", address: ["0x42F771DC235830077A04EE518472D88671755fF8"]}
-%{
-  address: ["0x42F771DC235830077A04EE518472D88671755fF8"],
-  fromBlock: "0x1D841AD",
-  toBlock: "0x1D8434C"
-}
-iex(5)> Ethex.get_logs_and_decode "https://matic-mumbai.chainstacklabs.com", "erc20", filter
+iex(1)> block_range = %Ethex.Web3.Structs.BlockRange{from_block: 46798863, to_block: 46798863}
+
+iex(2)> {:ok, logs} = Test.USDT.get_logs_and_decode block_range
 {:ok,
  [
-   %Ethex.Struct.Transaction{
-     address: "0x42f771dc235830077a04ee518472d88671755ff8",
-     block_hash: "0xcc827e8fae4271bf91c65ce10b3a590b6d9c2d665cf8ae55224caf1444753b9d",
-     block_number: 30950172,
-     event_name: "Transfer",
-     log_index: "0x10",
+   %Ethex.Web3.Structs.Event{
+     address: "0x55d398326f99059ff775485246999027b3197955",
+     block_hash: "0x943b3daa9119d8d4314f816a0f00cd824c9fe73a6d1a3076d16fe1ce91fc173d",
+     block_number: 46798863,
+     block_timestamp: 1739978103,
+     log_index: "0x1c",
      removed: false,
+     transaction_hash: "0x2c3795501857b8d6e1ccd00b4132373b25b76ccd399f1719aadbfec8d688c238",
+     transaction_index: "0x6",
      returns: [
-       %{name: "_from", value: "0x8ccf629e123d83112423c283998443829a291334"},
-       %{name: "_to", value: "0xa2e7d1addb682c3f2ba78d5124433cb8ba2a4f4b"},
-       %{name: "_value", value: 10000000000000000000000}
+       %{"from" => "0x47a90a2d92a8367a91efa1906bfc8c1e05bf10c4"},
+       %{"to" => "0x2d3b5ca3e5ff50b12cd9d58216abaaa6b3836443"},
+       %{"value" => 296241844581231922050}
      ],
-     transaction_hash: "0x48965d02c69f3eae46486d677efd55f06943fda3d8c2acf667ac5980ad569a1c",
-     transaction_index: "0x5"
-   }
- ]}
+     event_name: "Transfer"
+   },
+   %Ethex.Web3.Structs.Event{
+     address: "0x55d398326f99059ff775485246999027b3197955",
+     block_hash: "0x943b3daa9119d8d4314f816a0f00cd824c9fe73a6d1a3076d16fe1ce91fc173d",
+     block_number: 46798863,
+     block_timestamp: 1739978103,
+     log_index: "0x20",
+     removed: false,
+     transaction_hash: "0x6acedfff21e04d15a32eb633bce0e70cb82f6e8b2bbaab8800a1015c58452fd1",
+     transaction_index: "0x7",
+     returns: [
+       %{"from" => "0x172fcd41e0913e95784454622d1c3724f546f849"},
+       %{"to" => "0xaf30736465dec110ec6ab68d3a22e4b24968401f"},
+       %{"value" => 3755786748662943270309}
+     ],
+     event_name: "Transfer"
+   },
+   ...
+ ]
 ```
 
-For polling logs, you need to maintaining rpc endpoint and block range, to avoid `excceed max block` error. So here is a util for generate block range, it need `latest` or the block number you sync last time. The reason why not use `eth_getFilterChanges` is that some chain not implement this method.
+For polling logs, you need to maintaining block range to avoid `excceed max block` error. 
+
+So here is a util for generating block range, it need `latest` or the block number you sync last time. 
+The reason why not use `eth_getFilterChanges` is that some chain not implement this method.
+
+NOTE: the max block range in Polygon is 1000, in BSC is 5000.
 
 ```elixir
-iex(1)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", "latest"
-{:ok, 31246216, %{fromBlock: "0x1DCC774", toBlock: "0x1DCC788"} }
-iex(2)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", 31246216
-{:ok, 31246262, %{fromBlock: "0x1DCC788", toBlock: "0x1DCC7B6"} }
+iex(6)> Test.USDT.gen_block_range "latest"
+{:ok, 46799328,
+ %Ethex.Web3.Structs.BlockRange{from_block: 46799308, to_block: 46799328}}
+ 
+iex(7)> Test.USDT.gen_block_range 46798000
+{:ok, 46798800,
+ %Ethex.Web3.Structs.BlockRange{from_block: 46798000, to_block: 46798800}}
 ```
