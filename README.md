@@ -41,19 +41,25 @@ iex(1)> Ethex.block_number "https://matic-mumbai.chainstacklabs.com"
 {:ok, 30949805}
 ```
 
-When interact with contract on blockchain, firstly, register abi to let Ethex know about it. Given the abi name and abi path.
+### Interact with contract
+
+First write a module to parse abi, known which contract address interact with and rpc endpoint request to.
 
 ```elixir
-iex(2)> Ethex.register_abi "erc20", "/path/to/erc20.abi.json"
+defmodule Test do
+  @moduledoc false
+  use Ethex.Abi,
+    rpc: "https://binance.llamarpc.com",
+    abi_path: "./priv/abi/usdt.abi.json",
+    contract_address: "0x55d398326f99059fF775485246999027B3197955"
+end
 ```
 
 Then you can call function like `balanceOf`:
 
 ```elixir
-iex(3)> Ethex.call "https://matic-mumbai.chainstacklabs.com", "erc20",
-...(3)>   "0xf167FcA5b9FeDf4E8baCAf8547225af93832ed6F", "balanceOf",
-...(3)>   ["8CcF629e123D83112423c283998443829A291334" |> Base.decode16!(case: :mixed)]
-{:ok, [9999998000000000000000000000]}
+iex(1)> Test.balance_of "0x8CcF629e123D83112423c283998443829A291334"
+{:ok, 4011000000000000}
 ```
 
 And when do sync logs from blockchain by https endpoint:
