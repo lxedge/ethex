@@ -20,7 +20,9 @@ defmodule Ethex.Blockchain.StateMethod do
   Executes a new message call immediately without creating a transaction on the block chain.
 
   ### Parameters
+
   1. Object - The transaction call object
+
   - from: DATA, 20 Bytes - (optional) The address the transaction is sent from.
   - to: DATA, 20 Bytes - The address the transaction is directed to.
   - gas: QUANTITY - (optional) Integer of the gas provided for the transaction execution.
