@@ -23,6 +23,10 @@ defmodule Ethex.Abi do
         name = Macro.underscore(fs.function)
         args = Macro.generate_arguments(Enum.count(fs.input_names), __MODULE__)
 
+	params = Enum.zip(fs.input_names, fs.types) |> Enum.map(fn {name, type} -> "#{name}(#{inspect(type)})" end)
+	doc = "#{name}\n\nparams: #{Enum.join(params, ", ")}"
+
+        @doc doc
         def unquote(:"#{name}")(unquote_splicing(args)) do
           data = encode_data(unquote(Macro.escape(fs)), unquote(args))
           params = %{to: @contract_address, data: data}
@@ -55,7 +59,7 @@ defmodule Ethex.Abi do
         if Enum.count(returns) == 1 do
           List.first(returns)
         else
-	  returns
+          returns
         end
       end
 
