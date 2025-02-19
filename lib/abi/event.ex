@@ -9,7 +9,7 @@ defmodule Ethex.Abi.Event do
   }
   """
   alias Ethex.Abi.Abi
-  alias Ethex.Blockchain.{GossipMethod, HistoryMethod}
+  alias Ethex.Web3.JsonRpc
   alias Ethex.Utils
 
   @doc """
@@ -23,7 +23,7 @@ defmodule Ethex.Abi.Event do
   """
   @spec gen_block_range(String.t(), non_neg_integer() | String.t()) :: any()
   def gen_block_range(rpc, "latest") do
-    case GossipMethod.eth_block_number(rpc) do
+    case JsonRpc.eth_block_number(rpc) do
       {:ok, cur_block} ->
         {:ok, cur_block,
          %{fromBlock: Utils.to_hex(cur_block - 20), toBlock: Utils.to_hex(cur_block)}}
@@ -34,7 +34,7 @@ defmodule Ethex.Abi.Event do
   end
 
   def gen_block_range(rpc, last_block) when is_integer(last_block) do
-    case GossipMethod.eth_block_number(rpc) do
+    case JsonRpc.eth_block_number(rpc) do
       {:ok, cur_block} ->
         if cur_block - last_block > 800 do
           {:ok, last_block + 800,
@@ -57,7 +57,7 @@ defmodule Ethex.Abi.Event do
   @spec get_logs_and_decode(String.t(), String.t(), map()) :: {:error, any()} | {:ok, list()}
   def get_logs_and_decode(rpc, abi_name, filter) do
     with {:ok, selectors} <- Abi.get_selectors_by_name(abi_name),
-         {:ok, logs} <- HistoryMethod.eth_get_logs(rpc, filter) do
+         {:ok, logs} <- JsonRpc.eth_get_logs(rpc, filter) do
       {:ok, decode(logs, selectors)}
     else
       error -> error

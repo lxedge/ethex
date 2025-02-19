@@ -2,7 +2,7 @@ defmodule Ethex.Web3.JsonRpc do
   @moduledoc """
 
   ## Gossip Method
-  
+
   These methods track the head of the chain.
   This is how transactions make their way around the network,
   find their way into blocks, and how clients find out about new blocks.
@@ -19,6 +19,7 @@ defmodule Ethex.Web3.JsonRpc do
   The "state" is like one big shared piece of RAM,
   and includes account balances, contract data, and gas estimations.
   """
+  require Logger
   alias Ethex.Utils
 
   @doc """
@@ -26,7 +27,7 @@ defmodule Ethex.Web3.JsonRpc do
   """
   @spec eth_block_number(String.t()) :: {:error, any} | {:ok, integer}
   def eth_block_number(rpc) do
-    case Utils.http_post(rpc, %{method: "eth_blockNumber", params: []}) do
+    case http_post(rpc, %{method: "eth_blockNumber", params: []}) do
       {:ok, num} -> {:ok, Utils.from_hex(num)}
       error -> error
     end
@@ -37,14 +38,14 @@ defmodule Ethex.Web3.JsonRpc do
   a contract creation for signed transactions.
   """
   def eth_send_raw_transaction(rpc, data) do
-    Utils.http_post(rpc, %{method: "eth_sendRawTransaction", params: [data]})
+    http_post(rpc, %{method: "eth_sendRawTransaction", params: [data]})
   end
 
   @doc """
   Returns an array of all logs matching a given filter object.
   """
   def eth_get_logs(rpc, filter) do
-    Utils.http_post(rpc, %{method: "eth_getLogs", params: [filter]})
+    http_post(rpc, %{method: "eth_getLogs", params: [filter]})
   end
 
   @doc """
@@ -59,14 +60,14 @@ defmodule Ethex.Web3.JsonRpc do
   }
   """
   def eth_new_filter(rpc, filter) do
-    Utils.http_post(rpc, %{method: "eth_newFilter", params: [filter]})
+    http_post(rpc, %{method: "eth_newFilter", params: [filter]})
   end
 
   @doc """
   使用 filter_id 获取自 from 以来的 logs
   """
   def eth_get_filter_logs(rpc, filter_id) do
-    Utils.http_post(rpc, %{method: "eth_getFilterLogs", params: [filter_id]})
+    http_post(rpc, %{method: "eth_getFilterLogs", params: [filter_id]})
   end
 
   @doc """
@@ -75,14 +76,14 @@ defmodule Ethex.Web3.JsonRpc do
   REFERENCE: https://ethereum.stackexchange.com/questions/41129/web3-eth-getfilterchangesweb3-filter-filter-id-throws-filter-not-found
   """
   def eth_get_filter_changes(rpc, filter_id) do
-    Utils.http_post(rpc, %{method: "eth_getFilterChanges", params: [filter_id]})
+    http_post(rpc, %{method: "eth_getFilterChanges", params: [filter_id]})
   end
 
   @doc """
   Returns the number of transactions sent from an address.
   """
   def eth_get_transaction_count(rpc, address, block \\ "pending") do
-    case Utils.http_post(rpc, %{method: "eth_getTransactionCount", params: [address, block]}) do
+    case http_post(rpc, %{method: "eth_getTransactionCount", params: [address, block]}) do
       {:ok, num} -> {:ok, Utils.from_hex(num)}
       error -> error
     end
@@ -109,7 +110,7 @@ defmodule Ethex.Web3.JsonRpc do
       see the default block parameter
   """
   def eth_call(rpc, params, block \\ "latest") do
-    Utils.http_post(rpc, %{method: "eth_call", params: [params, block]})
+    http_post(rpc, %{method: "eth_call", params: [params, block]})
   end
 
   @doc """
@@ -119,9 +120,49 @@ defmodule Ethex.Web3.JsonRpc do
   used by the transaction, for a variety of reasons including EVM mechanics and node performance.
   """
   def eth_estimate_gas(rpc, params) do
-    case Utils.http_post(rpc, %{method: "eth_estimateGas", params: [params]}) do
+    case http_post(rpc, %{method: "eth_estimateGas", params: [params]}) do
       {:ok, num} -> {:ok, Utils.from_hex(num)}
       error -> error
+    end
+  end
+
+  defp http_post(rpc, params) do
+    headers = [{"Content-Type", "application/json"}]
+    body = Map.merge(%{jsonrpc: "2.0", id: fetch_request_id()}, params)
+    opts = [request_timeout: 30_000, receive_timeout: 5_000]
+
+    with {:ok, body_str} <- Jason.encode(body),
+         %Finch.Request{} = req <- Finch.build(:post, rpc, headers, body_str, opts),
+         {:ok, %Finch.Response{status: 200, body: body}} <- Finch.request(req, Ethex.Finch),
+         {:ok, %{result: result}} <- Jason.decode(body, keys: :atoms) do
+      {:ok, result}
+    else
+      {:error, %Jason.EncodeError{}} ->
+        Logger.error("Ethex.Utils.http_post request body error: #{inspect(params)}")
+        {:error, :invalid_params}
+
+      {:error, %Mint.TransportError{reason: :nxdomain}} ->
+        Logger.error("Ethex.Utils.http_post network error: nxdomain")
+        {:error, :network_error}
+
+      {_, %Finch.Response{status: status}} ->
+        Logger.error("Ethex.Utils.http_post response status error: #{status}")
+        {:error, :response_error}
+
+      {:error, %Jason.DecodeError{}} ->
+        Logger.error("Ethex.Utils.http_post response body error")
+        {:error, :response_error}
+
+      other ->
+        Logger.error("Ethex.Utils.http_post unknown error: #{inspect(other)}")
+        {:error, :unknown_error}
+    end
+  end
+
+  defp fetch_request_id() do
+    case Application.fetch_env(:ethex, :request_id) do
+      {:ok, value} -> value
+      :error -> "ethex"
     end
   end
 end
