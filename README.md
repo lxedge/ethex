@@ -55,7 +55,7 @@ defmodule Test do
 end
 ```
 
-Then you can call function like `balanceOf`:
+Then you can call functions:
 
 ```elixir
 iex(1)> Test.USDT.symbol
