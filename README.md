@@ -100,8 +100,3 @@ iex(1)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", "latest
 iex(2)> Ethex.gen_block_range "https://matic-mumbai.chainstacklabs.com", 31246216
 {:ok, 31246262, %{fromBlock: "0x1DCC788", toBlock: "0x1DCC7B6"} }
 ```
-
-## TODO
-
-- add send transaction, this will update minor version to 0.2.0
-- add config to initial register_abi and request_id
