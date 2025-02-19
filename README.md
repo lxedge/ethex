@@ -46,7 +46,7 @@ iex(1)> Ethex.block_number "https://matic-mumbai.chainstacklabs.com"
 First write a module to parse abi, known which contract address interact with and rpc endpoint request to.
 
 ```elixir
-defmodule Test do
+defmodule Test.USDT do
   @moduledoc false
   use Ethex.Abi,
     rpc: "https://binance.llamarpc.com",
