@@ -56,7 +56,10 @@ iex(9)> Test.USDT.balance_of "0x8CcF629e123D83112423c283998443829A291334"
 {:ok, 4011000000000000}
 ```
 
-**Sync Contract Logs**
+**Get logs and decode**
+
+By invoking `eth_getLogs` method, it can fetch contract logs from chain with block range.
+Then, decode logs to events as result.
 
 ```elixir
 iex(1)> block_range = %Ethex.Web3.Structs.BlockRange{from_block: 46798863, to_block: 46798863}
@@ -115,4 +118,43 @@ iex(6)> Test.USDT.gen_block_range "latest"
 iex(7)> Test.USDT.gen_block_range 46798000
 {:ok, 46798800,
  %Ethex.Web3.Structs.BlockRange{from_block: 46798000, to_block: 46798800}}
+```
+
+If wanna sync logs automatically, using GenServer with loop, and maintaining block range. Here is an example,
+
+```elixir
+defmodule Test.USDT do
+  @moduledoc false
+  use GenServer
+
+  use Ethex.Abi,
+    # rpc: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
+    rpc: "https://binance.llamarpc.com",
+    abi_path: "./priv/abi/usdt.abi.json",
+    contract_address: "0x55d398326f99059fF775485246999027B3197955"
+
+  @loop_interval 10
+
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
+  end
+
+  @impl true
+  def init(:ok) do
+    Process.send_after(self(), :loop, :timer.seconds(@loop_interval))
+    {:ok, %{last_sync_block: "latest"}}
+  end
+
+  @impl true
+  def handle_info(:loop, %{last_sync_block: last_sync_block} = _state) do
+    {:ok, cur_sync_block, block_range} = gen_block_range(last_sync_block)
+    {:ok, _evts} = get_logs_and_decode(block_range)
+
+    # do some other work, such as save events into database
+    # Repo.insert evts
+
+    Process.send_after(self(), :loop, :timer.seconds(@loop_interval))
+    {:noreply, %{last_sync_block: cur_sync_block}}
+  end
+end
 ```
