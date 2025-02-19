@@ -2,6 +2,8 @@
 
 Ethereum Contract interaction via json-rpc for multi-chain based on ex_abi, focused on Smart Contract interaction, with reading contract, writing contract, synchronizing contract events.
 
+**NOTE: version `1.x.x` is incompatible with `0.x.x`**
+
 ## Installation
 
 The package can be installed by adding `ethex` to your list of dependencies in `mix.exs`:
@@ -9,7 +11,7 @@ The package can be installed by adding `ethex` to your list of dependencies in `
 ```elixir
 def deps do
   [
-    {:ethex, "~> 0.2.0"}
+    {:ethex, "~> 1.0.0"}
   ]
 end
 ```
