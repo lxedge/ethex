@@ -1,6 +1,6 @@
 # Ethex
 
-Ethereum json-rpc implementation for multi-chain based on ex_abi.
+Ethereum json-rpc implementation for multi-chain based on ex_abi.  Focus on Contract interaction, with reading contract, writing contract, synchronizing contract events.
 
 ## Installation
 
@@ -37,7 +37,7 @@ defmodule Test.USDT do
 end
 ```
 
-Then you can call functions:
+**Read the Contract**
 
 ```elixir
 iex(1)> Test.USDT.symbol
@@ -56,7 +56,7 @@ iex(9)> Test.USDT.balance_of "0x8CcF629e123D83112423c283998443829A291334"
 {:ok, 4011000000000000}
 ```
 
-And when do sync logs from blockchain by https endpoint:
+**Sync Contract Logs**
 
 ```elixir
 iex(4)> filter = %{fromBlock: "0x1D841AD", toBlock: "0x1D8434C", address: ["0x42F771DC235830077A04EE518472D88671755fF8"]}

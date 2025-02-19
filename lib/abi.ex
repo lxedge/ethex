@@ -12,12 +12,14 @@ defmodule Ethex.Abi do
 
       ## Handle Function
 
-      fns =
+      abi =
         @abi_path
         |> File.read!()
         |> Jason.decode!()
-        |> ABI.parse_specification()
-        |> Enum.filter(fn fs ->
+        |> ABI.parse_specification(include_events?: true)
+
+      fns =
+        Enum.filter(abi, fn fs ->
           fs.type == :function and not String.starts_with?(fs.function, "_")
         end)
 
@@ -102,6 +104,23 @@ defmodule Ethex.Abi do
             error
         end
       end
+
+      # @doc """
+      # Combine eth_getLogs with decode
+
+      # NOTE: address in filter SHOULD match abi_name, or will be discard.
+      # """
+      # @spec get_logs_and_decode(String.t(), String.t(), map()) :: {:error, any()} | {:ok, list()}
+      # def get_logs_and_decode(rpc, abi_name, filter) do
+      #   with {:ok, selectors} <- Abi.get_selectors_by_name(abi_name),
+      #        {:ok, logs} <- JsonRpc.eth_get_logs(rpc, filter) do
+      #     {:ok, decode(logs, selectors)}
+      #   else
+      #     error -> error
+      #   end
+      # end
+
+      evts = Enum.filter(abi, fn fs -> fs.type == :event end)
 
       defp encode16_address_if_need(address) do
         if is_bitstring(address) and not String.valid?(address) do
