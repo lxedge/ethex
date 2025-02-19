@@ -58,7 +58,19 @@ end
 Then you can call function like `balanceOf`:
 
 ```elixir
-iex(1)> Test.balance_of "0x8CcF629e123D83112423c283998443829A291334"
+iex(1)> Test.USDT.symbol
+{:ok, "USDT"}
+iex(2)>
+iex(3)> Test.USDT.name
+{:ok, "Tether USD"}
+iex(4)>
+iex(5)> Test.USDT.decimals
+{:ok, 18}
+iex(6)>
+iex(7)> Test.USDT.get_owner
+{:ok, "0xf68a4b64162906eff0ff6ae34e2bb1cd42fef62d"}
+iex(8)>
+iex(9)> Test.USDT.balance_of "0x8CcF629e123D83112423c283998443829A291334"
 {:ok, 4011000000000000}
 ```
 

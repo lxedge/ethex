@@ -1,4 +1,4 @@
-defmodule Test do
+defmodule Test.USDT do
   @moduledoc false
   use Ethex.Abi,
     # rpc: "https://data-seed-prebsc-1-s1.bnbchain.org:8545",
