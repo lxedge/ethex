@@ -2,13 +2,15 @@ defmodule Ethex.Abi do
   @moduledoc """
   Parse `xxx.abi.json` file into functions.
   """
-  alias Ethex.Blockchain.StateMethod
+  alias Ethex.Web3.JsonRpc
 
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
       @abi_path opts[:abi_path] || raise("abi_path is required for parsing functions.")
       @contract_address opts[:contract_address] || raise("contract_address is required.")
       @rpc opts[:rpc] || raise("rpc is required to know which endpoint to request.")
+
+      ## Handle Function
 
       fns =
         @abi_path
@@ -23,15 +25,18 @@ defmodule Ethex.Abi do
         name = Macro.underscore(fs.function)
         args = Macro.generate_arguments(Enum.count(fs.input_names), __MODULE__)
 
-	params = Enum.zip(fs.input_names, fs.types) |> Enum.map(fn {name, type} -> "#{name}(#{inspect(type)})" end)
-	doc = "#{name}\n\nparams: #{Enum.join(params, ", ")}"
+        params =
+          Enum.zip(fs.input_names, fs.types)
+          |> Enum.map(fn {name, type} -> "#{name}(#{inspect(type)})" end)
+
+        doc = "#{name}\n\nparams: #{Enum.join(params, ", ")}"
 
         @doc doc
         def unquote(:"#{name}")(unquote_splicing(args)) do
           data = encode_data(unquote(Macro.escape(fs)), unquote(args))
           params = %{to: @contract_address, data: data}
 
-          case StateMethod.eth_call(@rpc, params) do
+          case JsonRpc.eth_call(@rpc, params) do
             {:ok, result} -> {:ok, decode_result(unquote(Macro.escape(fs)), result)}
             error -> error
           end
@@ -60,6 +65,41 @@ defmodule Ethex.Abi do
           List.first(returns)
         else
           returns
+        end
+      end
+
+      ## Handle Event
+
+      @spec gen_block_range() :: any()
+      def gen_block_range(), do: gen_block_range("latest")
+
+      @doc """
+      Generate fromBlock and toBlock params according to current block num
+
+      1. when `last_block` == "latest", fetch from newest back to 20 blocks.
+      2. when `cur_block` - `last_block` > 800, fetch from `last_block` forwards 800 blocks.
+      3. else, `cur_block` - `last_block` > 800, fetch from `last_block` to cur_block.
+
+      NOTE: the max block range in Polygon is 1000, in BSC is 5000.
+      """
+      @spec gen_block_range(non_neg_integer() | String.t()) :: any()
+      def gen_block_range(last_block) do
+        case JsonRpc.eth_block_number(@rpc) do
+          {:ok, cur_block} ->
+            cond do
+              is_integer(last_block) and cur_block - last_block > 800 ->
+                {:ok, last_block + 800, %{fromBlock: last_block, toBlock: last_block + 800}}
+
+              is_integer(last_block) ->
+                {:ok, cur_block, %{fromBlock: last_block, toBlock: cur_block}}
+
+              # "latest" == last_block ->
+              true ->
+                {:ok, cur_block, %{fromBlock: cur_block - 20, toBlock: cur_block}}
+            end
+
+          error ->
+            error
         end
       end
 
