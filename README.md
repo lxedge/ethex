@@ -2,24 +2,6 @@
 
 Ethereum json-rpc implementation for multi-chain based on ex_abi.
 
-## Cases I met
-
-### case one
-
-In every elixir backend dapp, you need interact with contract on blockchain. And you need to write or copy get_logs logic and decode_event logic again and again.
-
-### case two
-
-Every time I sync logs from chain, firstly decode indexed topic and decode data, then combine them together. What I need is decoding once and never destroy origin structure of logs.
-
-### case three
-
-In my case, the contract can deployed on ETH, or BSC, or Polygon. So I need to switch between multi-chain, not just one global config for json-rpc client.
-
-### case four
-
-In production, there are many contracts which its address is constructed by a factory contract. So those library who combine address in a module is not a good idea.
-
 ## Installation
 
 The package can be installed by adding `ethex` to your list of dependencies in `mix.exs`:
