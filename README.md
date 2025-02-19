@@ -1,6 +1,6 @@
 # Ethex
 
-Ethereum json-rpc implementation for multi-chain based on ex_abi, focused on Smart Contract interaction, with reading contract, writing contract, synchronizing contract events.
+Ethereum Contract interaction via json-rpc for multi-chain based on ex_abi, focused on Smart Contract interaction, with reading contract, writing contract, synchronizing contract events.
 
 ## Installation
 
@@ -9,7 +9,7 @@ The package can be installed by adding `ethex` to your list of dependencies in `
 ```elixir
 def deps do
   [
-    {:ethex, "~> 0.1.3"}
+    {:ethex, "~> 0.2.0"}
   ]
 end
 ```

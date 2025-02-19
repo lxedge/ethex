@@ -4,9 +4,9 @@ defmodule Ethex.MixProject do
   def project do
     [
       app: :ethex,
-      version: "0.1.3",
+      version: "0.2.0",
       elixir: "~> 1.12",
-      description: "Ethereum json-rpc implementation for multi-chain based on ex_abi",
+      description: "Ethereum Contract interaction via json-rpc for multi-chain based on ex_abi",
       package: [
         licenses: ["GPL-3.0"],
         links: %{"GitHub" => "https://github.com/lxedge/ethex"}
@@ -14,7 +14,9 @@ defmodule Ethex.MixProject do
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      source_url: "https://github.com/lxedge/ethex"
+      source_url: "https://github.com/lxedge/ethex",
+      homepage_url: "https://hexdocs.pm/ethex",
+      docs: &docs/0
     ]
   end
 
@@ -38,6 +40,13 @@ defmodule Ethex.MixProject do
       {:ex_abi, "~> 0.8.2"},
       {:ex_secp256k1, "~> 0.7.4"},
       {:mnemonic, "~> 0.3.1"}
+    ]
+  end
+
+  defp docs do
+    [
+      main: "Ethex",
+      extras: ["README.md"]
     ]
   end
 end
