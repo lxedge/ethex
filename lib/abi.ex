@@ -1,8 +1,10 @@
 defmodule Ethex.Abi do
   @moduledoc """
-  Parse `xxx.abi.json` file into functions.
+  Parse `xxx.abi.json`
   """
+  alias Ethex.Utils
   alias Ethex.Web3.JsonRpc
+  alias Ethex.Web3.Structs.{BlockRange, Event}
 
   defmacro __using__(opts) do
     quote bind_quoted: [opts: opts] do
@@ -72,7 +74,7 @@ defmodule Ethex.Abi do
 
       ## Handle Event
 
-      @spec gen_block_range() :: any()
+      @spec gen_block_range() :: {:ok, pos_integer(), BlockRange.t()} | {:error, :atom}
       def gen_block_range(), do: gen_block_range("latest")
 
       @doc """
@@ -84,20 +86,22 @@ defmodule Ethex.Abi do
 
       NOTE: the max block range in Polygon is 1000, in BSC is 5000.
       """
-      @spec gen_block_range(non_neg_integer() | String.t()) :: any()
+      @spec gen_block_range(pos_integer() | String.t()) ::
+              {:ok, pos_integer(), BlockRange.t()} | {:error, :atom}
       def gen_block_range(last_block) do
         case JsonRpc.eth_block_number(@rpc) do
           {:ok, cur_block} ->
             cond do
               is_integer(last_block) and cur_block - last_block > 800 ->
-                {:ok, last_block + 800, %{fromBlock: last_block, toBlock: last_block + 800}}
+                {:ok, last_block + 800,
+                 %BlockRange{from_block: last_block, to_block: last_block + 800}}
 
               is_integer(last_block) ->
-                {:ok, cur_block, %{fromBlock: last_block, toBlock: cur_block}}
+                {:ok, cur_block, %BlockRange{from_block: last_block, to_block: cur_block}}
 
               # "latest" == last_block ->
               true ->
-                {:ok, cur_block, %{fromBlock: cur_block - 20, toBlock: cur_block}}
+                {:ok, cur_block, %BlockRange{from_block: cur_block - 20, to_block: cur_block}}
             end
 
           error ->
@@ -105,22 +109,71 @@ defmodule Ethex.Abi do
         end
       end
 
-      # @doc """
-      # Combine eth_getLogs with decode
+      @doc """
+      Combine eth_getLogs with decode
 
-      # NOTE: address in filter SHOULD match abi_name, or will be discard.
-      # """
-      # @spec get_logs_and_decode(String.t(), String.t(), map()) :: {:error, any()} | {:ok, list()}
-      # def get_logs_and_decode(rpc, abi_name, filter) do
-      #   with {:ok, selectors} <- Abi.get_selectors_by_name(abi_name),
-      #        {:ok, logs} <- JsonRpc.eth_get_logs(rpc, filter) do
-      #     {:ok, decode(logs, selectors)}
-      #   else
-      #     error -> error
-      #   end
-      # end
+      NOTE: address in filter SHOULD match abi_name, or will be discard.
+      """
+      @spec get_logs_and_decode(BlockRange.t()) :: {:error, :atom} | {:ok, [Event.t(), ...]}
+      def get_logs_and_decode(%BlockRange{from_block: from, to_block: to}) do
+        filter = %{
+          fromBlock: Utils.to_hex(from),
+          toBlock: Utils.to_hex(to),
+          address: [@contract_address]
+        }
+
+        case JsonRpc.eth_get_logs(@rpc, filter) do
+          {:ok, logs} -> {:ok, Enum.map(logs, &decode_log/1)}
+          error -> error
+        end
+      end
 
       evts = Enum.filter(abi, fn fs -> fs.type == :event end)
+
+      def decode_log(%{topics: topics, data: data} = log) do
+        ts = Enum.map(topics, &hex_to_binary/1)
+
+        {fs, result} =
+          ABI.Event.find_and_decode(
+            unquote(Macro.escape(evts)),
+            Enum.at(ts, 0),
+            Enum.at(ts, 1),
+            Enum.at(ts, 2),
+            Enum.at(ts, 3),
+            hex_to_binary(data)
+          )
+
+        returns =
+          Enum.map(result, fn {key, type, indexed?, value} ->
+            val =
+              if type in ["address", :address] do
+                encode16_address_if_need(value)
+              else
+                value
+              end
+
+            %{key => val}
+          end)
+
+        %Event{
+          address: log.address,
+          block_hash: log.blockHash,
+          block_number: Utils.from_hex(log.blockNumber),
+          block_timestamp: Utils.from_hex(log.blockTimestamp),
+          log_index: log.logIndex,
+          removed: log.removed,
+          transaction_hash: log.transactionHash,
+          transaction_index: log.transactionIndex,
+          event_name: fs.function,
+          returns: returns
+        }
+      end
+
+      ## utils
+
+      defp hex_to_binary("0x" <> hex_string) do
+        Base.decode16!(hex_string, case: :lower)
+      end
 
       defp encode16_address_if_need(address) do
         if is_bitstring(address) and not String.valid?(address) do

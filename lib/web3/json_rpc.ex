@@ -153,6 +153,10 @@ defmodule Ethex.Web3.JsonRpc do
         Logger.error("Ethex.Utils.http_post response body error")
         {:error, :response_error}
 
+      {:ok, %{error: %{code: errcode, message: errmsg}}} ->
+        Logger.error("Ethex.Utils.http_post response error: #{errcode}, #{errmsg}")
+        {:error, :"rpc_error_#{errcode}"}
+
       other ->
         Logger.error("Ethex.Utils.http_post unknown error: #{inspect(other)}")
         {:error, :unknown_error}

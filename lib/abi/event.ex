@@ -121,7 +121,7 @@ defmodule Ethex.Abi.Event do
     Enum.zip(names, datas) |> Enum.map(fn {name, data} -> %{name: name, value: data} end)
   end
 
-  defp decode_data(data, selector) do
+  def decode_data(data, selector) do
     names = filter_helper(selector.inputs_indexed, selector.input_names, false)
 
     datas =
@@ -133,7 +133,7 @@ defmodule Ethex.Abi.Event do
     Enum.zip(names, datas) |> Enum.map(fn {name, data} -> %{name: name, value: data} end)
   end
 
-  defp encode_data_signature(function_selector) do
+  def encode_data_signature(function_selector) do
     data_types = filter_helper(function_selector.inputs_indexed, function_selector.types, false)
     types = get_types(data_types) |> Enum.join(",")
     "#{function_selector.function}(#{types})"
