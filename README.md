@@ -1,6 +1,6 @@
 # Ethex
 
-Ethereum json-rpc implementation for multi-chain based on ex_abi.  Focus on Contract interaction, with reading contract, writing contract, synchronizing contract events.
+Ethereum json-rpc implementation for multi-chain based on ex_abi, focused on Smart Contract interaction, with reading contract, writing contract, synchronizing contract events.
 
 ## Installation
 
@@ -80,22 +80,6 @@ iex(2)> {:ok, logs} = Test.USDT.get_logs_and_decode block_range
        %{"from" => "0x47a90a2d92a8367a91efa1906bfc8c1e05bf10c4"},
        %{"to" => "0x2d3b5ca3e5ff50b12cd9d58216abaaa6b3836443"},
        %{"value" => 296241844581231922050}
-     ],
-     event_name: "Transfer"
-   },
-   %Ethex.Web3.Structs.Event{
-     address: "0x55d398326f99059ff775485246999027b3197955",
-     block_hash: "0x943b3daa9119d8d4314f816a0f00cd824c9fe73a6d1a3076d16fe1ce91fc173d",
-     block_number: 46798863,
-     block_timestamp: 1739978103,
-     log_index: "0x20",
-     removed: false,
-     transaction_hash: "0x6acedfff21e04d15a32eb633bce0e70cb82f6e8b2bbaab8800a1015c58452fd1",
-     transaction_index: "0x7",
-     returns: [
-       %{"from" => "0x172fcd41e0913e95784454622d1c3724f546f849"},
-       %{"to" => "0xaf30736465dec110ec6ab68d3a22e4b24968401f"},
-       %{"value" => 3755786748662943270309}
      ],
      event_name: "Transfer"
    },
