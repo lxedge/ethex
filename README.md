@@ -11,7 +11,7 @@ The package can be installed by adding `ethex` to your list of dependencies in `
 ```elixir
 def deps do
   [
-    {:ethex, "~> 1.0.0"}
+    {:ethex, "~> 1.1.0"}
   ]
 end
 ```
