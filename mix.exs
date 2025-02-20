@@ -14,8 +14,10 @@ defmodule Ethex.MixProject do
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      # ExDoc
+      name: "ethex",
       source_url: "https://github.com/lxedge/ethex",
-      homepage_url: "https://hexdocs.pm/ethex",
+      homepage_url: "https://github.com/lxedge/ethex",
       docs: &docs/0
     ]
   end
@@ -46,6 +48,7 @@ defmodule Ethex.MixProject do
   defp docs do
     [
       main: "Ethex",
+      canonical: "https://hexdocs.pm/ethex",
       extras: ["README.md"]
     ]
   end

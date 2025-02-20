@@ -1,23 +1,8 @@
 defmodule Ethex.Web3.JsonRpc do
   @moduledoc """
+  Json RPC.
 
-  ## Gossip Method
-
-  These methods track the head of the chain.
-  This is how transactions make their way around the network,
-  find their way into blocks, and how clients find out about new blocks.
-
-  ## History Method
-
-  Fetches historical records of every block back to genesis.
-  This is like one large append-only file, and includes all block headers,
-  block bodies, uncle blocks, and transaction receipts.
-
-  ## State Method
-
-  Methods that report the current state of all the data stored.
-  The "state" is like one big shared piece of RAM,
-  and includes account balances, contract data, and gas estimations.
+  This module wrap the nessisary methods used by ABI.
   """
   require Logger
   alias Ethex.Utils
@@ -53,18 +38,22 @@ defmodule Ethex.Web3.JsonRpc do
   to notify when the state changes (logs).
   To check if the state has changed, call eth_getFilterChanges.
 
-  %{
-    address: ["0x4aF359FC3dd065F185739EC2f8F444A746A912f2"],
-    fromBlock: "0x16DF136",
-    toBlock: "latest"
-  }
+  ### Example
+
+  ```elixir
+  iex(1)> filter = %{
+  ...(1)>   address: ["0x4aF359FC3dd065F185739EC2f8F444A746A912f2"],
+  ...(1)>   fromBlock: "0x16DF136",
+  ...(1)>   toBlock: "latest"
+  ...(1)> }
+  ```
   """
   def eth_new_filter(rpc, filter) do
     http_post(rpc, %{method: "eth_newFilter", params: [filter]})
   end
 
   @doc """
-  使用 filter_id 获取自 from 以来的 logs
+  Returns an array of all logs matching filter with given id.
   """
   def eth_get_filter_logs(rpc, filter_id) do
     http_post(rpc, %{method: "eth_getFilterLogs", params: [filter_id]})
