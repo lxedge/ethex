@@ -144,7 +144,7 @@ defmodule Ethex.Abi do
           )
 
         returns =
-          Enum.map(result, fn {key, type, indexed?, value} ->
+          Enum.map(result, fn {key, type, _indexed?, value} ->
             val =
               if type in ["address", :address] do
                 encode16_address_if_need(value)
@@ -152,7 +152,7 @@ defmodule Ethex.Abi do
                 value
               end
 
-            %{key => val}
+            %{name: key, value: val}
           end)
 
         %Event{
