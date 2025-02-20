@@ -25,6 +25,28 @@ iex(1)> Ethex.block_number "https://binance.llamarpc.com"
 {:ok, 46792582}
 ```
 
+### Wallet
+
+Create or import wallet by private key, examples below,
+
+```elixir
+iex(1)> Ethex.create_wallet
+%Ethex.Web3.Wallet{
+  private_key: "58d4475ecd42f9be425b28866374741db82dd6b71cfb0eb54bb1a09ff85ca87b",
+  public_key: "04d179509d453e1d401850c1dc4ba16541487dd22565747ccde722312802e05c3b4f39375891a711f05aa93f56da130eed164efa10620a9a45390b66046862653b",
+  eth_address: "0x2dc3c3ce6901ab9be01379d374d58c1eb0fc7a85",
+  mnemonic_phrase: "flee peasant stumble once convince tennis annual govern major brick brown derive lizard twice symbol panda attitude prevent unaware donkey zebra comic peanut lazy"
+}
+
+iex(2)> Ethex.create_wallet "58d4475ecd42f9be425b28866374741db82dd6b71cfb0eb54bb1a09ff85ca87b"
+%Ethex.Web3.Wallet{
+  private_key: "58d4475ecd42f9be425b28866374741db82dd6b71cfb0eb54bb1a09ff85ca87b",
+  public_key: "04d179509d453e1d401850c1dc4ba16541487dd22565747ccde722312802e05c3b4f39375891a711f05aa93f56da130eed164efa10620a9a45390b66046862653b",
+  eth_address: "0x2dc3c3ce6901ab9be01379d374d58c1eb0fc7a85",
+  mnemonic_phrase: "flee peasant stumble once convince tennis annual govern major brick brown derive lizard twice symbol panda attitude prevent unaware donkey zebra comic peanut lazy"
+}
+```
+
 ### Interact with contract
 
 First write a module to parse abi, known which contract address interact with and rpc endpoint request to.
