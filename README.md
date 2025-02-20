@@ -79,9 +79,9 @@ iex(2)> {:ok, logs} = Test.USDT.get_logs_and_decode block_range
      transaction_hash: "0x2c3795501857b8d6e1ccd00b4132373b25b76ccd399f1719aadbfec8d688c238",
      transaction_index: "0x6",
      returns: [
-       %{"from" => "0x47a90a2d92a8367a91efa1906bfc8c1e05bf10c4"},
-       %{"to" => "0x2d3b5ca3e5ff50b12cd9d58216abaaa6b3836443"},
-       %{"value" => 296241844581231922050}
+       %{name: "from", value: "0x47a90a2d92a8367a91efa1906bfc8c1e05bf10c4"},
+       %{name: "to", value: "0x2d3b5ca3e5ff50b12cd9d58216abaaa6b3836443"},
+       %{name: "value", value: 296241844581231922050}
      ],
      event_name: "Transfer"
    },
