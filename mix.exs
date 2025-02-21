@@ -1,24 +1,20 @@
 defmodule Ethex.MixProject do
   use Mix.Project
 
+  @source_url "https://github.com/lxedge/ethex"
+  @version "1.1.1"
+
   def project do
     [
       app: :ethex,
-      version: "1.1.0",
+      name: "Ethex",
+      version: @version,
       elixir: "~> 1.12",
-      description: "Ethereum Contract interaction via json-rpc for multi-chain based on ex_abi",
-      package: [
-        licenses: ["GPL-3.0"],
-        links: %{"GitHub" => "https://github.com/lxedge/ethex"}
-      ],
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      # ExDoc
-      name: "ethex",
-      source_url: "https://github.com/lxedge/ethex",
-      homepage_url: "https://github.com/lxedge/ethex",
-      docs: &docs/0
+      package: package(),
+      docs: docs()
     ]
   end
 
@@ -37,7 +33,7 @@ defmodule Ethex.MixProject do
       {:ex_doc, "~> 0.37.1", only: :dev, runtime: false},
       {:jason, "~> 1.4"},
       {:finch, "~> 0.19.0"},
-      {:rustler, "~> 0.36.1"},
+      {:rustler, ">= 0.30.0"},
       {:ex_keccak, "~> 0.7.6"},
       {:ex_abi, "~> 0.8.2"},
       {:ex_secp256k1, "~> 0.7.4"},
@@ -45,10 +41,22 @@ defmodule Ethex.MixProject do
     ]
   end
 
+  defp package do
+    [
+      description: "Ethereum Contract interaction via json-rpc for multi-chain based on ex_abi",
+      maintainer: "lxedge",
+      licenses: ["GPL-3.0"],
+      links: %{"GitHub" => @source_url}
+    ]
+  end
+
   defp docs do
     [
-      main: "Ethex",
+      main: "readme",
       canonical: "https://hexdocs.pm/ethex",
+      source_url: @source_url,
+      homepage_url: @source_url,
+      formatters: ["html"],
       extras: ["README.md"]
     ]
   end
