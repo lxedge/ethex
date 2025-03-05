@@ -1,6 +1,12 @@
 defmodule Ethex.Abi do
   @moduledoc """
-  Parse `xxx.abi.json`
+  This module parse the given ABI functions let you encode and decode parameters
+  to ABI (Application Binary Interface) for function calls to the EVM (Ethereum Virtual Machine).
+
+  Functions described in ABI will defined into your module, such as `MyApp.USDT`.
+  And the functions go steps further, it invokes `eth_call` or `eth_sendRawTransation` based on which
+  stateMutability is and decode its result.  For example, When a function's stateMutability is `pure` or `view`,
+  `eth_call` will be invoked and the result will be decoded for you if request success.
   """
   alias Ethex.Utils
   alias Ethex.Web3.JsonRpc
@@ -12,20 +18,21 @@ defmodule Ethex.Abi do
       @contract_address opts[:contract_address] || raise("contract_address is required.")
       @rpc opts[:rpc] || raise("rpc is required to know which endpoint to request.")
 
-      ## Handle Function
-
       abi =
         @abi_path
         |> File.read!()
         |> Jason.decode!()
         |> ABI.parse_specification(include_events?: true)
 
-      fns =
+      ## Handle view/pure function
+
+      read_fns =
         Enum.filter(abi, fn fs ->
-          fs.type == :function and not String.starts_with?(fs.function, "_")
+          fs.type == :function and fs.state_mutability in [:pure, :view] and
+            not String.starts_with?(fs.function, "_")
         end)
 
-      for fs <- fns do
+      for fs <- read_fns do
         name = Macro.underscore(fs.function)
         args = Macro.generate_arguments(Enum.count(fs.input_names), __MODULE__)
 
