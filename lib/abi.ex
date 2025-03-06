@@ -162,11 +162,17 @@ defmodule Ethex.Abi do
             %{name: key, value: val}
           end)
 
+        timestamp =
+          case Map.get(log, :blockTimestamp) do
+            nil -> nil
+            ts -> Utils.from_hex(ts)
+          end
+
         %Event{
           address: log.address,
           block_hash: log.blockHash,
           block_number: Utils.from_hex(log.blockNumber),
-          block_timestamp: Utils.from_hex(log.blockTimestamp),
+          block_timestamp: timestamp,
           log_index: log.logIndex,
           removed: log.removed,
           transaction_hash: log.transactionHash,
