@@ -37,7 +37,8 @@ defmodule Ethex.MixProject do
       {:ex_keccak, "~> 0.7.6"},
       {:ex_abi, "~> 0.8.2"},
       {:ex_secp256k1, "~> 0.7.4"},
-      {:mnemonic, "~> 0.3.1"}
+      {:mnemonic, "~> 0.3.1"},
+      {:ex_rlp, "~> 0.6.0"}
     ]
   end
 

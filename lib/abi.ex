@@ -24,7 +24,7 @@ defmodule Ethex.Abi do
         |> Jason.decode!()
         |> ABI.parse_specification(include_events?: true)
 
-      ## Handle view/pure function
+      ## Handle view/pure functions
 
       read_fns =
         Enum.filter(abi, fn fs ->
@@ -54,6 +54,33 @@ defmodule Ethex.Abi do
         end
       end
 
+      ## Handle non_payable functions
+
+      write_fns =
+        Enum.filter(abi, fn fs ->
+          fs.type == :function and fs.state_mutability == :non_payable and
+            not String.starts_with?(fs.function, "_")
+        end)
+
+      for fs <- write_fns do
+	name = Macro.underscore(fs.function)
+	args = Macro.generate_arguments(Enum.count(fs.input_names), __MODULE__)
+
+	params =
+          Enum.zip(fs.input_names, fs.types)
+          |> Enum.map(fn {name, type} -> "#{name}(#{inspect(type)})" end)
+
+	doc = "#{name}\n\nparams: #{Enum.join(params, ", ")}"
+
+	@doc doc
+	def unquote(:"#{name}")(unquote_splicing(args)) do
+	  tx = %{
+	    to: @contract_address,
+	    data: encode_data(unquote(Macro.escape(fs)), unquote(args))
+	  }
+	end
+      end
+
       defp encode_data(fs, args) do
         args =
           for {type, arg} <- Enum.zip(fs.types, args),
@@ -79,7 +106,7 @@ defmodule Ethex.Abi do
         end
       end
 
-      ## Handle Event
+      ## Handle Events
 
       @spec gen_block_range() :: {:ok, pos_integer(), BlockRange.t()} | {:error, :atom}
       def gen_block_range(), do: gen_block_range("latest")
