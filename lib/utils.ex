@@ -12,7 +12,9 @@ defmodule Ethex.Utils do
   ```
   """
   @spec to_hex(integer()) :: String.t()
-  def to_hex(number) when is_integer(number), do: "0x" <> Integer.to_string(number, 16)
+  def to_hex(number) when is_integer(number) do
+    "0x" <> String.downcase(Integer.to_string(number, 16))
+  end
 
   @doc """
   From hex
