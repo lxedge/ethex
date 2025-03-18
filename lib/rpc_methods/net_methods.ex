@@ -1,4 +1,4 @@
-defmodule Ethex.RpcMethods.NetRpc do
+defmodule Ethex.RpcMethods.NetMethods do
   @moduledoc """
   https://www.quicknode.com/docs/ethereum/net_version
   """
